@@ -30,6 +30,10 @@ def build(winners):
         msg += " and " + winners[len(winners) - 1]
     return msg
 
+def postPoll():
+    response = postClient.create_tweet(text = "Which emoji will get the least votes", poll_duration_minutes=86400, poll_options=[twemoji.pickEmoji(), twemoji.pickEmoji(), twemoji.pickEmoji(), twemoji.pickEmoji()])
+    return response.data["id"]
+
 def postResults(tweetID):
     tweet = queryClient.get_tweet(tweetID, expansions=["attachments.poll_ids"])
     options = tweet.includes["polls"][0].options
@@ -56,8 +60,6 @@ postResults('1504268182353334279')
 
 #winners = []
 #minVotes = math.inf
-
-
 
 
 #todo, check only one poll at a time ??!?!?!!
