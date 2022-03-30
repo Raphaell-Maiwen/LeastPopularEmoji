@@ -11,11 +11,11 @@ postClient = tweepy.Client(consumer_key=config.API_KEY,
                        access_token=config.ACCESS_TOKEN,
                        access_token_secret=config.ACCESS_TOKEN_SECRET)
 
-auth = tweepy.OAuth1UserHandler(consumer_key=config.API_KEY, consumer_secret=config.API_SECRET)
-auth.set_access_token(config.ACCESS_TOKEN, config.ACCESS_TOKEN_SECRET)
-api = tweepy.API(auth)
+#auth = tweepy.OAuth1UserHandler(consumer_key=config.API_KEY, consumer_secret=config.API_SECRET)
+#auth.set_access_token(config.ACCESS_TOKEN, config.ACCESS_TOKEN_SECRET)
+#api = tweepy.API(auth)
 
-#queryClient = tweepy.Client(bearer_token=config.BEARER_TOKEN)
+queryClient = tweepy.Client(bearer_token=config.BEARER_TOKEN)
 #response = queryClient.search_recent_tweets(query=query, max_results=10, poll_fields="voting_status", expansions=['attachments.poll_ids'])
 
 ###################################################################################################################
@@ -31,14 +31,13 @@ def build(winners):
     return msg
 
 def postResults(tweetID):
-    tweet = api.get_status(tweetID)
-    print(tweet.entities)
+    tweet = queryClient.get_tweet(tweetID, expansions=["attachments.poll_ids"])
+    options = tweet.includes["polls"][0].options
 
     winners = []
     minVotes = math.inf
 
-    for option in tweet.options:
-        print(option["votes"])
+    for option in options:
         if(option["votes"] < minVotes):
             winners.clear()
             winners.append(option["label"])
@@ -46,7 +45,8 @@ def postResults(tweetID):
         elif(option["votes"] == minVotes):
             winners.append(option["label"])
 
-    postClient.create_tweet(text=build(winners), quote_tweet_id=tweetID)
+    print(build(winners))
+#    postClient.create_tweet(text=build(winners), quote_tweet_id=tweetID)
 
 
 postResults('1504268182353334279')
@@ -89,7 +89,7 @@ postResults('1504268182353334279')
 #Part where we post new round
 ###################################################################################################################
 
-print(twemoji.pickEmoji())
+#print(twemoji.pickEmoji())
 
 #postClient.create_tweet(text = "Pick your date", poll_duration_minutes=1440, poll_options=[twemoji.pickEmoji(), twemoji.pickEmoji(), twemoji.pickEmoji(), twemoji.pickEmoji()])
 
@@ -97,8 +97,8 @@ print(twemoji.pickEmoji())
 #print(response)
 #print(response.data["id"])
 
-tweet = api.get_status(1504268182353334279)
-print(tweet.text)
+#tweet = api.get_status(1504268182353334279)
+#print(tweet.text)
 
 #todo:
 #comment ne pas poster plusieurs fois le résultat d'une game
