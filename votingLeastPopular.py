@@ -4,6 +4,10 @@ import config
 import twemoji
 import time
 
+#todo:
+#determine what happens when no one votes, less than x amount of votes
+#put the right times
+
 username = 'RafikiDev'
 #Mettre le mot clé de début de game comme query
 #query = 'sondage from:RafikiDev OR mind from:RafikiDev' #-isquote
@@ -36,6 +40,7 @@ def postPoll():
     response = postClient.create_tweet(text = "Which emoji will get the least votes", poll_duration_minutes=5, poll_options=[twemoji.pickEmoji(), twemoji.pickEmoji(), twemoji.pickEmoji(), twemoji.pickEmoji()])
     return response.data["id"]
 
+
 def postResults(tweetID):
     tweet = queryClient.get_tweet(tweetID, expansions=["attachments.poll_ids"])
     options = tweet.includes["polls"][0].options
@@ -51,7 +56,19 @@ def postResults(tweetID):
         elif(option["votes"] == minVotes):
             winners.append(option["label"])
 
-    postClient.create_tweet(text=build(winners), quote_tweet_id=tweetID)
+    endGameMessage = "People who voted for " + build(winners) + " win. There is a total of " + str(
+        minVotes * len(winners))
+
+    if ((minVotes * len(winners)) > 1):
+        endGameMessage += " winners"
+    else:
+        endGameMessage += " winner"
+
+    endGameMessage += " for this round."
+
+    postClient.create_tweet(text=endGameMessage, quote_tweet_id=tweetID)
+
+
 
 polls = [0,0,0,0]
 
@@ -64,74 +81,4 @@ while(1):
     polls.append(postPoll())
 
     time.sleep(75)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#polls = {p['id']: p for p in response.includes['polls']}
-#print(polls)
-
-#winners = []
-#minVotes = math.inf
-
-
-#todo, check only one poll at a time ??!?!?!!
-#for poll in polls:
- #   #todo: maybe remove this check when we'll migrate to IDs
-  #  if(polls[poll].voting_status == "closed"):
-   #     for option in polls[poll].options:
-    #        print(option["votes"])
-     #       if(option["votes"] < minVotes):
-      #          winners.clear()
-       #         winners.append(option["label"])
-        #        minVotes = option["votes"]
-         #   elif(option["votes"] == minVotes):
-          #      winners.append(option["label"])
-
-
-#endGameMessage = "People who voted for " + build(winners) + " win. There is a total of " + str(minVotes * len(winners))
-#if((minVotes * len(winners)) > 1):
-#    endGameMessage += " winners"
-#else:
-#    endGameMessage += " winner"
-
-#endGameMessage += " for this round."
-
-#We will want to post endGameMessage in a quote retweet
-#print(endGameMessage)
-
-###################################################################################################################
-#Part where we post new round
-###################################################################################################################
-
-#print(twemoji.pickEmoji())
-
-#postClient.create_tweet(text = "Pick your date", poll_duration_minutes=1440, poll_options=[twemoji.pickEmoji(), twemoji.pickEmoji(), twemoji.pickEmoji(), twemoji.pickEmoji()])
-
-#response = postClient.create_tweet(text = "Getting closer (?)")
-#print(response)
-#print(response.data["id"])
-
-#tweet = api.get_status(1504268182353334279)
-#print(tweet.text)
-
-#todo:
-#comment ne pas poster plusieurs fois le résultat d'une game
-#heroku
-
 
