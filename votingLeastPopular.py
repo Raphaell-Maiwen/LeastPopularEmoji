@@ -2,6 +2,7 @@ import math
 import tweepy
 import config
 import twemoji
+import time
 
 username = 'RafikiDev'
 #Mettre le mot clé de début de game comme query
@@ -31,7 +32,8 @@ def build(winners):
     return msg
 
 def postPoll():
-    response = postClient.create_tweet(text = "Which emoji will get the least votes", poll_duration_minutes=86400, poll_options=[twemoji.pickEmoji(), twemoji.pickEmoji(), twemoji.pickEmoji(), twemoji.pickEmoji()])
+    #poll_duration_minutes=1440
+    response = postClient.create_tweet(text = "Which emoji will get the least votes", poll_duration_minutes=5, poll_options=[twemoji.pickEmoji(), twemoji.pickEmoji(), twemoji.pickEmoji(), twemoji.pickEmoji()])
     return response.data["id"]
 
 def postResults(tweetID):
@@ -49,11 +51,37 @@ def postResults(tweetID):
         elif(option["votes"] == minVotes):
             winners.append(option["label"])
 
-    print(build(winners))
-#    postClient.create_tweet(text=build(winners), quote_tweet_id=tweetID)
+    postClient.create_tweet(text=build(winners), quote_tweet_id=tweetID)
+
+polls = [0,0,0,0]
+
+while(1):
+    poll = polls.pop(0)
+    print(poll)
+    if(poll != 0):
+        postResults(poll)
+
+    polls.append(postPoll())
+
+    time.sleep(75)
 
 
-postResults('1504268182353334279')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #polls = {p['id']: p for p in response.includes['polls']}
 #print(polls)
